@@ -20,7 +20,7 @@ jobs:
       - name: Test
         run: npm run test
 
-      - name: Docker Hub Build
+      - name: Build in Docker Container
         run: docker build -t ${{ secrets.DOCKER_USER }}/devops-github-actions:${{ github.sha }} .
 
       - name: Login to Docker Hub
