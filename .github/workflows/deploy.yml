@@ -19,3 +19,6 @@ jobs:
 
       - name: Test
         run: npm run test
+
+      - name: Build
+        run: docker build -t ${{ secrets.DOCKER_USER }}/devops-github-actions:${{ github.sha }} .
