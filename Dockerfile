@@ -1,5 +1,5 @@
 FROM node:20-alpine
-
+LABEL authors="ag"
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
