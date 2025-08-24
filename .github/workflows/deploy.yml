@@ -5,7 +5,7 @@ on:
     branches: [main]  # Запускать только при пуше в ветку main
 
 jobs:
-  build:
+  test-build:
     runs-on: ubuntu-latest  # Используем GitHub-hosted runner с Ubuntu
 
     steps:
@@ -29,17 +29,19 @@ jobs:
       - name: Push to Docker Hub
         run: docker push ${{ secrets.DOCKER_USER }}/devops-github-actions:${{ github.sha }}
 
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
-            docker pull ${{ secrets.DOCKER_USER }}/devops-github-actions:${{ github.sha }}
-            docker stop devops-github-actions || true
-            docker rm devops-github-actions || true
-            docker run -d -p 4545:4545 --name devops-github-actions ${{ secrets.DOCKER_USER }}/devops-github-actions:${{ github.sha }}
-
-
+  deploy:
+    needs: test-build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to Server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+          docker pull ${{ secrets.DOCKER_USER }}/devops-github-actions:${{ github.sha }}
+          docker stop devops-github-actions || true
+          docker rm devops-github-actions || true
+          docker run -d -p 4545:4545 --name devops-github-actions ${{ secrets.DOCKER_USER }}/devops-github-actions:${{ github.sha }}
