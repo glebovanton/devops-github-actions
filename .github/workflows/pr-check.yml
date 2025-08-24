@@ -3,6 +3,7 @@ name: PR-check Pipeline
 on:
   pull_request:
     branches: [main]  # Запускать только при PR в ветку main
+  workflow_call:
 
 jobs:
   check:

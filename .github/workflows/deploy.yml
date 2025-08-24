@@ -5,20 +5,14 @@ on:
     branches: [main]  # Запускать только при пуше в ветку main
 
 jobs:
-  test-build:
+  checks:
+    uses: ./.github/workflows/pr-check.yml
+  build:
+    needs: checks
     runs-on: ubuntu-latest  # Используем GitHub-hosted runner с Ubuntu
 
     steps:
-      - uses: actions/checkout@v3  # Клонирует код из репозитория
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Test
-        run: npm run test
+      - uses: actions/checkout@v3
 
       - name: Build in Docker Container
         run: docker build -t ${{ secrets.DOCKER_USER }}/devops-github-actions:${{ github.sha }} .
@@ -30,7 +24,7 @@ jobs:
         run: docker push ${{ secrets.DOCKER_USER }}/devops-github-actions:${{ github.sha }}
 
   deploy:
-    needs: test-build
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Deploy to Server
